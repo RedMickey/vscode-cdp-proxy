@@ -10,15 +10,17 @@ const { Connection, Server, WebSocketTransport } = require('./');
 const targetAddress = 'ws://localhost:9222/devtools/browser/7b2a52b9-f097-425a-b43c-18f0a50cdc0b';
 
 (async () => {
-  const server = await Server.create();
+  const server = await Server.create({ port: 13602 });
 
   server.onConnection(async toDebugger => {
     console.log('Got connection from debugger');
     toDebugger.onError(err => console.error('Error on debugger transport', err));
     toDebugger.pause(); // don't listen for events until the target is ready
 
-    const toTarget = new Connection(await WebSocketTransport.create(targetAddress));
+    console.log('Before connection to target');
+    const toTarget = new Connection(await WebSocketTransport.create(server.getWsEndpoint()));
     console.log('Connected to target');
+
     toTarget.onError(err => console.error('Error on target transport', err));
 
     // Copy commands (requests) from one pipe to the other.

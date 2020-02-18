@@ -9,6 +9,7 @@ import { WebSocketTransport } from './transports/websocket';
 import { IDisposable } from './disposable';
 import { Server as HttpServer, createServer } from 'http';
 import { AddressInfo } from 'net';
+import { URLSearchParams } from 'url';
 
 export interface IServerOptions {
   host: string;
@@ -19,6 +20,9 @@ export interface IServerOptions {
  * WebSocket server used to set up a CDP proxy.
  */
 export class Server implements IDisposable {
+  
+  private wsEndpoint: string = "";
+  
   /**
    * Creates a new server, returning a promise that's resolved when it's opened.
    */
@@ -55,11 +59,17 @@ export class Server implements IDisposable {
    */
   public readonly address = this.httpServer.address() as AddressInfo;
 
+  public getWsEndpoint(): string {
+    return this.wsEndpoint;
+  }
+
   protected constructor(
     private readonly wss: WebSocketServer,
     private readonly httpServer: HttpServer,
   ) {
-    wss.on('connection', ws => {
+    wss.on('connection', (ws, req) => {
+      const param = new URLSearchParams(req.url);
+      this.wsEndpoint = param.get("/?target") || "";
       this.connectionEmitter.emit(new Connection(new WebSocketTransport(ws)));
     });
   }
