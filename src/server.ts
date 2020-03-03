@@ -19,6 +19,9 @@ export interface IServerOptions {
  * WebSocket server used to set up a CDP proxy.
  */
 export class Server implements IDisposable {
+
+  private previousWsConnection: any = null;
+
   /**
    * Creates a new server, returning a promise that's resolved when it's opened.
    */
@@ -60,6 +63,13 @@ export class Server implements IDisposable {
     private readonly httpServer: HttpServer,
   ) {
     wss.on('connection', (ws, req) => {
+      if (wss.clients.size > 1 && this.previousWsConnection) {
+        this.previousWsConnection.terminate();
+        this.previousWsConnection = null;
+      }
+      
+      this.previousWsConnection = ws;
+      
       this.connectionEmitter.emit([new Connection(new WebSocketTransport(ws)), req]);
     });
   }

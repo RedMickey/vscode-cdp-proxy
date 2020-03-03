@@ -7,7 +7,7 @@
 const { Connection, Server, WebSocketTransport } = require('./');
 
 (async () => {
-  const server = await Server.create({ port: 8999});
+  const server = await Server.create({ port: 13602});
 
   server.onConnection(async ([toDebugger, req]) => {
     console.log('Got connection from debugger');
