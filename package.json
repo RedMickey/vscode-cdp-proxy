@@ -11,7 +11,7 @@
     "fmt": "prettier --write \"src/**/*.ts\" \"*.md\"",
     "compile": "rimraf dist && tsc",
     "watch": "rimraf dist && tsc --watch",
-    "prepack": "npm run compile"
+    "prepack": "npm install && npm run compile"
   },
   "repository": {
     "type": "git",
