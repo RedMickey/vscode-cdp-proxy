@@ -7,9 +7,13 @@
 const { Connection, Server, WebSocketTransport } = require('./');
 
 // Target debug address to connect to:
-const targetAddress = 'ws://localhost:9222/devtools/browser/7b2a52b9-f097-425a-b43c-18f0a50cdc0b';
+// const targetAddress = 'ws://localhost:9222/devtools/browser/7b2a52b9-f097-425a-b43c-18f0a50cdc0b';
 
 (async () => {
+
+  let launchArgs = process.argv.slice(2);
+  let targetAddress = launchArgs[0] || "";
+
   const server = await Server.create({ port: 13602 });
 
   server.onConnection(async toDebugger => {
@@ -18,7 +22,10 @@ const targetAddress = 'ws://localhost:9222/devtools/browser/7b2a52b9-f097-425a-b
     toDebugger.pause(); // don't listen for events until the target is ready
 
     console.log('Before connection to target');
-    const toTarget = new Connection(await WebSocketTransport.create(server.getWsEndpoint()));
+
+    targetAddress = server.getWsEndpoint() || targetAddress;
+
+    const toTarget = new Connection(await WebSocketTransport.create(targetAddress));
     console.log('Connected to target');
 
     toTarget.onError(err => console.error('Error on target transport', err));

@@ -21,7 +21,9 @@ export interface IServerOptions {
  */
 export class Server implements IDisposable {
   
+  private TARGET_PARAMETER_NAME = "/?target";
   private wsEndpoint: string = "";
+  private previousWsConnection: any = null;
   
   /**
    * Creates a new server, returning a promise that's resolved when it's opened.
@@ -68,8 +70,15 @@ export class Server implements IDisposable {
     private readonly httpServer: HttpServer,
   ) {
     wss.on('connection', (ws, req) => {
+      if (wss.clients.size > 1 && this.previousWsConnection) {
+        this.previousWsConnection.terminate();
+        this.previousWsConnection = null;
+      }
+      
+      this.previousWsConnection = ws;
+
       const param = new URLSearchParams(req.url);
-      this.wsEndpoint = param.get("/?target") || "";
+      this.wsEndpoint = param.get(this.TARGET_PARAMETER_NAME) || "";
       this.connectionEmitter.emit(new Connection(new WebSocketTransport(ws)));
     });
   }
