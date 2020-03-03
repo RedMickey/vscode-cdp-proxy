@@ -11,7 +11,7 @@
     "fmt": "prettier --write \"src/**/*.ts\" \"*.md\"",
     "compile": "rimraf dist && tsc",
     "watch": "rimraf dist && tsc --watch",
-    "install": "tsc"
+    "prepare": "tsc"
   },
   "repository": {
     "type": "git",
