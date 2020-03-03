@@ -4,13 +4,14 @@
   "description": "Sample Chrome Debug Protocol proxy used to extend vscode-js-debug",
   "main": "dist/index.js",
   "scripts": {
-    "prepublish": "npm run compile",
+    "prepublishOnly": "npm run compile",
     "test": "rimraf dist && tsc && npm run test:unit npm run test:fmt",
     "test:unit": "mocha --opts mocha.opts",
     "test:fmt": "prettier --list-different \"src/**/*.ts\" \"*.md\"",
     "fmt": "prettier --write \"src/**/*.ts\" \"*.md\"",
     "compile": "rimraf dist && tsc",
-    "watch": "rimraf dist && tsc --watch"
+    "watch": "rimraf dist && tsc --watch",
+    "postpack": "rimraf dist && tsc"
   },
   "repository": {
     "type": "git",
