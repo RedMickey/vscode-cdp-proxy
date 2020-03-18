@@ -84,6 +84,10 @@ export class Connection {
     transport.onEnd(() => this.handleTransportClosed());
   }
 
+  public getConnectionId(): string {
+    return this.connectionId;
+  }
+
   /**
    * Pauses receiving events, queuing them until unpause is called.
    */
