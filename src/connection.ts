@@ -7,6 +7,7 @@ import Cdp from './cdp';
 import { EventEmitter as NodeEmitter } from 'events';
 import { CdpError } from './cdp-error';
 import { TaskCancelledError, EventEmitter } from 'cockatiel';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface IProtocolCommand {
   id?: number;
@@ -48,11 +49,13 @@ export class Connection {
 
   private lastId = 0;
   private closed = false;
+  private connectionId: string;
   private pauseQueue?: ProtocolMessage[];
   private readonly callbacks = new Map<number, IDeferred<unknown>>();
   private readonly innerEmitter = new NodeEmitter();
   private readonly commandEmitter = new EventEmitter<IProtocolCommand>();
   private readonly replyEmitter = new EventEmitter<IProtocolSuccess | IProtocolError>();
+  private readonly disconnectEmitter = new EventEmitter<string>();
 
   /**
    * Emitter that fires if an error happens on the underlying transport.
@@ -62,7 +65,7 @@ export class Connection {
   /**
    * Emitter that fires when the underlying connection is closed.
    */
-  public readonly onEnd = this.transport.onEnd;
+  public readonly onDisconnected = this.disconnectEmitter.addListener;
 
   /**
    * Emitter that fires when any command is received, on addition to any
@@ -76,7 +79,9 @@ export class Connection {
   public readonly onReply = this.replyEmitter.addListener;
 
   constructor(private readonly transport: ITransport) {
+    this.connectionId = uuidv4();
     transport.onMessage(msg => this.processResponse(msg as ProtocolMessage));
+    transport.onEnd(() => this.handleTransportClosed());
   }
 
   /**
@@ -146,6 +151,11 @@ export class Connection {
 
   public isClosed(): boolean {
     return this.closed;
+  }
+
+  private handleTransportClosed() {
+    this.closed = true;
+    this.disconnectEmitter.emit(this.connectionId);
   }
 
   private createDomain(domain: string) {
