@@ -47,6 +47,7 @@ export class Connection {
   }) as Cdp.Api;
 
   private lastId = 0;
+  private closed = false;
   private pauseQueue?: ProtocolMessage[];
   private readonly callbacks = new Map<number, IDeferred<unknown>>();
   private readonly innerEmitter = new NodeEmitter();
@@ -140,6 +141,11 @@ export class Connection {
     }
 
     this.callbacks.clear();
+    this.closed = true;
+  }
+
+  public isClosed(): boolean {
+    return this.closed;
   }
 
   private createDomain(domain: string) {
